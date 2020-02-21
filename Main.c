@@ -109,6 +109,32 @@ int main(int argc, char* argv[]) {
         printf(", %i", num[i]);
     }
     printf("\n"); */
+
+/* Preliminary heap testing
+    int num[] = {51, 124, 109, 1, 61, 121, 50, 0, 0, 0, 0};
+    int* size = malloc(sizeof(int));
+    *size = 7;
+    struct Heap heap = makeHeap(num, size);
+    int curr = Size(heap);
+    for(int i = 0; i < curr; i++) {
+        printf("; %i", num[i]);
+    }
+    printf("\n");
+    
+    extractMin(heap);
+    for(int i = 0; i < Size(heap); i++) {
+        printf(", %i", num[i]);
+    }
+    printf("\n");
+
+    insert(heap, 5);
+    for(int i = 0; i < Size(heap); i++) {
+        printf(", %i", num[i]);
+    }
+    printf("\n");
+
+    free(size);
+    */
 }
 
 double random_num(void) {

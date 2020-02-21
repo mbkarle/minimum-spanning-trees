@@ -4,15 +4,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define MAX_SIZE 100000 //change as needed
 
-//struct Heap;
+struct Heap;
 
 //move array values into heap order
-void makeHeap(int arr[], int size) {
-    for(int i = size/2; i >= 0; i--) {
-        minHeapify(arr, size, i);
+struct Heap makeHeap(int* arr, int* size) {
+    struct Heap h;
+    h.arr = arr;
+    h.size = size;
+    for(int i = *size/2; i >= 0; i--) {
+        minHeapify(h, i);
     }
+    return h;
 }
 
 //return left child index
@@ -37,29 +40,52 @@ bool exists(int index, int size) {
 
 //swap integers at pointers
 void swap(int* a, int* b) {
-    printf("a: %i\n", *a);
     int temp = *a;
     *a = *b;
     *b = temp;
 }
 
 //"fix" heap. Assume children of index are roots of min heaps
-void minHeapify(int heap[], int size, int index) {
+void minHeapify(struct Heap heap, int index) {
+    int* arr = heap.arr;
+    int size = Size(heap);
     int l = left(index), r = right(index), min;
-    min = (exists(l, size) && heap[l] < heap[index]) ? l : index;
-    if(exists(r, size) && heap[r] < heap[min]) {
+    min = (exists(l, size) && arr[l] < arr[index]) ? l : index;
+    if(exists(r, size) && arr[r] < arr[min]) {
         min = r;
     }
 
     if(min != index) {
-        swap(&(heap[index]), &(heap[min]));
-        minHeapify(heap, size, min);
+        swap(&(arr[index]), &(arr[min]));
+        minHeapify(heap, min);
     }
 }
 
 //see minimum element without extraction
-int peek(int heap[]){
-    return heap[0];
+int peek(struct Heap heap) {
+    return heap.arr[0];
 }
 
-//int extractMin(int heap[])
+int extractMin(struct Heap heap) {
+    int min = heap.arr[0];
+    heap.arr[0] = heap.arr[Size(heap) - 1];
+    *(heap.size) -= 1;
+    minHeapify(heap, 0);
+    return min;
+}
+
+void insert(struct Heap heap, int value) { //insert new obj into heap
+    int* arr = heap.arr;
+    int i = Size(heap);
+    arr[i] = value;
+    *(heap.size) += 1;
+    while(i != 0 && arr[parent(i)] > arr[i]) {
+        swap(&arr[parent(i)], &arr[i]);
+        i = parent(i);
+    }
+}
+
+int Size(struct Heap heap) {
+    int curr_size = *(heap.size);
+    return curr_size;
+}
