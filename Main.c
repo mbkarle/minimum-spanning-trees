@@ -7,8 +7,10 @@
 
 //command line input: - ./randmst 0 numpoints numtrials dimension
 
+void printMatrix(int numpoints, double adj_matrix[][numpoints]);
 double random_num();
 double distance_finder(int dim, int i, int j, double coords[][dim]);
+void fill_rand(int numpoints, double adj_matrix[][numpoints]);
 
 int main(int argc, char* argv[]) {
     srand(time(0) * 100000);
@@ -22,40 +24,7 @@ int main(int argc, char* argv[]) {
 
     if (dim == 0)
     {
-      for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = i + 1; j < numpoints; j++)
-        {
-          adj_matrix[i][j] = random_num();
-        }
-      }
-
-      for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = 0; j < i + 1; j++)
-        {
-          adj_matrix[i][j] = -1;
-        }
-      }
-
-
-      for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = 0; j < numpoints; j++)
-        {
-          printf("%lf ", adj_matrix[i][j]);
-        }
-        printf("\n");
-      }
-      printf("\n");
-
-
-
-      /*double vertex_coords[numpoints];
-      for (int i = 0; i < numpoints; i++)
-      {
-          vertex_coords[i] = random_num();
-      } */
+        fill_rand(numpoints, adj_matrix);
     }
     else
     {
@@ -78,30 +47,9 @@ int main(int argc, char* argv[]) {
             adj_matrix[i][j] = distance_finder(dim, i, j, vertex_coords);
         }
       }
-
-      for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = 0; j < i + 1; j++)
-        {
-          adj_matrix[i][j] = -1;
-        }
-      }
-
-      for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = 0; j < numpoints; j++)
-        {
-          printf("%lf ", adj_matrix[i][j]);
-        }
-        printf("\n");
-      }
-      printf("\n");
-
-
     }
 
-
-
+    printMatrix(numpoints, adj_matrix);
 
 /*    int num[] = {51, 124, 109, 1, 61, 121, 50};
     makeHeap(num, 7);
@@ -151,4 +99,26 @@ double distance_finder(int dim, int i, int j, double coords[][dim])
     }
     output = sqrt(output);
     return(output);
+}
+
+void printMatrix(int numpoints, double adj_matrix[][numpoints]) {
+    for (int i = 0; i < numpoints; i++)
+    {
+      for (int j = 0; j < numpoints; j++)
+      {
+        printf("%lf ", adj_matrix[i][j]);
+      }
+      printf("\n");
+    }
+    printf("\n");
+}
+
+void fill_rand(int numpoints, double adj_matrix[][numpoints]) {
+    for (int i = 0; i < numpoints; i++)
+    {
+        for (int j = i + 1; j < numpoints; j++)
+        {
+          adj_matrix[i][j] = random_num();
+        }
+    }
 }
