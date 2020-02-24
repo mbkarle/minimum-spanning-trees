@@ -8,12 +8,19 @@
 struct Heap;
 
 //move array values into heap order
-struct Heap makeHeap(int* arr, int* size) {
+struct Heap makeHeap(Node* arr, int capacity, int* size) {
     struct Heap h;
-    h.arr = arr;
+    h.arr = malloc(sizeof(Node*) * capacity);
     h.size = size;
-    for(int i = *size/2; i >= 0; i--) {
-        minHeapify(h, i);
+    if(*size > 0) {
+        for(int i = 0; i < *size; i++) {
+            h.arr[i] = &arr[i];
+            arr[i].inH = true;
+            arr[i].heapIdx = i;
+        }
+        for(int i = *size/2; i >= 0; i--) {
+            minHeapify(h, i);
+        }
     }
     return h;
 }
@@ -38,48 +45,62 @@ bool exists(int index, int size) {
     return (index < size);
 }
 
-//swap integers at pointers
-void swap(int* a, int* b) {
-    int temp = *a;
+//swap nodes at pointers
+void swap(Node** a, Node** b) {
+    int old_idx = (*a) -> heapIdx; //swap stored indices of heap
+    (*(*a)).heapIdx = (*b) -> heapIdx;
+    (*(*b)).heapIdx = old_idx;
+
+    Node* temp = *a; //swap what nodes are pointed to at array addresses
     *a = *b;
     *b = temp;
 }
 
+bool lessThan(Node* n1, Node* n2) {
+    return ((n1 -> dist) < (n2 -> dist));
+}
+
 //"fix" heap. Assume children of index are roots of min heaps
 void minHeapify(struct Heap heap, int index) {
-    int* arr = heap.arr;
+    Node** arr = heap.arr;
     int size = Size(heap);
     int l = left(index), r = right(index), min;
-    min = (exists(l, size) && arr[l] < arr[index]) ? l : index;
-    if(exists(r, size) && arr[r] < arr[min]) {
+    min = (exists(l, size) && lessThan(arr[l], arr[index])) ? l : index;
+    if(exists(r, size) && lessThan(arr[r], arr[min])) {
         min = r;
     }
 
     if(min != index) {
-        swap(&(arr[index]), &(arr[min]));
+        swap(&arr[index], &arr[min]);
         minHeapify(heap, min);
     }
 }
 
 //see minimum element without extraction
-int peek(struct Heap heap) {
+Node* peek(struct Heap heap) {
     return heap.arr[0];
 }
 
-int extractMin(struct Heap heap) {
-    int min = heap.arr[0];
+Node* extractMin(struct Heap heap) {
+    Node* min = heap.arr[0];
     heap.arr[0] = heap.arr[Size(heap) - 1];
+    (*(heap.arr[0])).heapIdx = 0;
     *(heap.size) -= 1;
     minHeapify(heap, 0);
     return min;
 }
 
-void insert(struct Heap heap, int value) { //insert new obj into heap
-    int* arr = heap.arr;
-    int i = Size(heap);
-    arr[i] = value;
-    *(heap.size) += 1;
-    while(i != 0 && arr[parent(i)] > arr[i]) {
+void insert(struct Heap heap, Node* value) { //insert new obj into heap
+    Node** arr = heap.arr;
+    int i = value -> heapIdx;
+    if(!(value -> inH)) {
+        i = Size(heap);
+        (*(value)).inH = true; 
+        (*(value)).heapIdx = i;
+        arr[i] = value;
+        *(heap.size) += 1;
+    }
+    while(i != 0 && lessThan(arr[i], arr[parent(i)])) {
         swap(&arr[parent(i)], &arr[i]);
         i = parent(i);
     }
@@ -88,4 +109,11 @@ void insert(struct Heap heap, int value) { //insert new obj into heap
 int Size(struct Heap heap) {
     int curr_size = *(heap.size);
     return curr_size;
+}
+
+void printHeap(struct Heap heap) {
+    for(int i = 0; i < Size(heap); i++) {
+        printf("%i   ", heap.arr[i] -> idx);
+    }
+    printf("\n");
 }
