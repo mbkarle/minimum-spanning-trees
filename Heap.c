@@ -37,7 +37,7 @@ int right(int index) {
 
 //return parent index
 int parent(int index) {
-    return index / 2;
+    return (index - 1) / 2;
 }
 
 //check index is valid in array
@@ -82,7 +82,7 @@ Node* peek(struct Heap heap) {
 }
 
 Node* extractMin(struct Heap heap) {
-    isHeap(heap);
+//    isHeap(heap);
     Node* min = heap.arr[0];
     heap.arr[0] = heap.arr[Size(heap) - 1];
     (*(heap.arr[0])).heapIdx = 0;
@@ -113,17 +113,24 @@ int Size(struct Heap heap) {
 }
 
 void printHeap(struct Heap heap) {
-    for(int i = 0; i < Size(heap); i++) {
-        printf("%i   ", heap.arr[i] -> idx);
+    for(int i = 0; i <= floor(log(Size(heap))/log(2)); i++) {
+        for(int j = 0; j < pow(2, i); j++) {
+            int index = pow(2, i) - 1 + j;
+            printf("(N:%i, dist: %lf)     ", heap.arr[index] -> idx, heap.arr[index] -> dist);
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
 bool isHeap(struct Heap heap) {
     for(int i = 0; i < Size(heap); i++) {
         int l = left(i), r = right(i);
         if((exists(l, Size(heap)) && lessThan(heap.arr[l], heap.arr[i])) || (exists(r, Size(heap)) && lessThan(heap.arr[r], heap.arr[i]))) {
-            printf("ERROR HEAP NOT VALID");
+           printf("====================\n");
+           printf("ERROR HEAP NOT VALID\n");
+           printf("Misplaced index exists at idx = %i\n", i);
+           printHeap(heap);
+           printf("====================\n");
            return false;
         }
     }

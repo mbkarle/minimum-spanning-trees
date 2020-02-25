@@ -12,15 +12,18 @@ double random_num();
 double distance_finder(int dim, int i, int j, Node * vert);
 double prims(int numpoints, int dim);
 void print_nodes(int numpoints, int dim);
+void nextCounter(int numpoints);
 
 Node* vertices;
 double** adj_matrix;
 Heap H;
+int counter;
 
 /*----------Main----------*/
 //command line input: - ./randmst 0 numpoints numtrials dimension
 int main(int argc, char* argv[]) {
-    double average;
+    double average = 0;
+    counter = 0;
 
 
     srand(time(0) * 100000);
@@ -85,7 +88,7 @@ int main(int argc, char* argv[]) {
 
     double weight = prims(numpoints, dim);
     printf("Weight: %lf\n", weight);
-    print_nodes(numpoints, dim);
+    //print_nodes(numpoints, dim);
 
     /*----------Free Data structures----------*/
     free(H.arr);
@@ -104,9 +107,12 @@ double prims(int numpoints, int dim) {
     insert(H, &vertices[0]);
 
     while(Size(H) != 0) {
+//        if(!isHeap(H))
+ //           return 0;
         v = *(extractMin(H));
         weight += v.dist;
-        printf("Added edge of weight %lf\n", v.dist);
+        nextCounter(numpoints);
+        //printf("Added edge of weight %lf\n", v.dist);
         v.inS = true;
         for(int i = 0; i < numpoints; i++) {
             if (i != v.idx) {
@@ -115,7 +121,6 @@ double prims(int numpoints, int dim) {
                 if(!vertices[i].inS && vertices[i].dist > distance) {
                     vertices[i].dist = distance;
                     insert(H, &vertices[i]);
-                    isHeap(H);
                 }
             }
         }
@@ -130,12 +135,13 @@ double random_num(void) {
 
 double distance_finder(int dim, int i, int j, Node * vert)
 {
-    double output;
+    double output = 0;
     for (int k = 0; k < dim; k++)
     {
         output = output + pow(vert[i].coord[k]-vert[j].coord[k],2);
     }
     output = sqrt(output);
+    //printf("edges %i to %i have weight: %lf\n", i, j, output);
     return(output);
 }
 
@@ -151,4 +157,12 @@ void print_nodes(int numpoints, int dim)
         printf("\n");
     }
     printf("\n");
+}
+
+void nextCounter(int numpoints) {
+    counter++;
+    if(counter % 1000 == 0) {
+        printf("\rNodes in tree: %i / %i", counter, numpoints);
+        fflush(stdout);
+    }
 }
