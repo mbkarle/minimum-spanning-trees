@@ -11,6 +11,8 @@ typedef struct Node {
     bool inH; //is it in the heap?
     bool inS; //is it in S? initialize to false and change when added to MST
     double dist; //current known distance from S to node
+    double coord[4];
+
 } Node;
 
 typedef struct Heap {
@@ -32,5 +34,6 @@ Node* extractMin(struct Heap heap);
 void insert(struct Heap heap, Node* value);
 int Size(struct Heap heap);
 void printHeap(struct Heap heap);
+bool isHeap(struct Heap heap);
 
 #endif

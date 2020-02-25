@@ -82,6 +82,7 @@ Node* peek(struct Heap heap) {
 }
 
 Node* extractMin(struct Heap heap) {
+    isHeap(heap);
     Node* min = heap.arr[0];
     heap.arr[0] = heap.arr[Size(heap) - 1];
     (*(heap.arr[0])).heapIdx = 0;
@@ -95,7 +96,7 @@ void insert(struct Heap heap, Node* value) { //insert new obj into heap
     int i = value -> heapIdx;
     if(!(value -> inH)) {
         i = Size(heap);
-        (*(value)).inH = true; 
+        (*(value)).inH = true;
         (*(value)).heapIdx = i;
         arr[i] = value;
         *(heap.size) += 1;
@@ -116,4 +117,15 @@ void printHeap(struct Heap heap) {
         printf("%i   ", heap.arr[i] -> idx);
     }
     printf("\n");
+}
+
+bool isHeap(struct Heap heap) {
+    for(int i = 0; i < Size(heap); i++) {
+        int l = left(i), r = right(i);
+        if((exists(l, Size(heap)) && lessThan(heap.arr[l], heap.arr[i])) || (exists(r, Size(heap)) && lessThan(heap.arr[r], heap.arr[i]))) {
+            printf("ERROR HEAP NOT VALID");
+           return false;
+        }
+    }
+    return true;
 }

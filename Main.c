@@ -8,12 +8,10 @@
 #include <limits.h>
 
 /*----------Function Headers----------*/
-void printMatrix(int numpoints);
 double random_num();
-double distance_finder(int dim, int i, int j, double coords[][dim]);
-void fill_rand(int numpoints);
-void free_adj(int numpoints);
-double prims(int numpoints); 
+double distance_finder(int dim, int i, int j, Node * vert);
+double prims(int numpoints, int dim);
+void print_nodes(int numpoints, int dim);
 
 Node* vertices;
 double** adj_matrix;
@@ -22,19 +20,22 @@ Heap H;
 /*----------Main----------*/
 //command line input: - ./randmst 0 numpoints numtrials dimension
 int main(int argc, char* argv[]) {
+    double average;
+
+
     srand(time(0) * 100000);
     //seeds the random number generator with current time
 
     //read inputs
-    int numpoints = atoi(argv[2]); 
+    int numpoints = atoi(argv[2]);
     printf("%i \n", numpoints);
     int dim = atoi(argv[4]);
 
     //instantiate n x n adjacency matrix
-    adj_matrix = malloc(numpoints * sizeof(double*));
+    /*adj_matrix = malloc(numpoints * sizeof(double*));
     for(int i = 0; i < numpoints; i++) {
         adj_matrix[i] = malloc(numpoints * sizeof(double));
-    }
+    } */
 
     //instantiate node array
     vertices = malloc(sizeof(Node) * numpoints);
@@ -45,32 +46,30 @@ int main(int argc, char* argv[]) {
         vertices[i].inH = false;
     }
 
-    
-    
+    printf("Vertices Malloced \n");
+
+
+
     /*----------Case Dim = 0----------*/
     //Fill with random weights in [0, 1]
-    if (dim == 0)
-    {
-        fill_rand(numpoints);
-    }
+    //if (dim == 0)
+    //{
+    //  fill_rand(numpoints);
+    //}
 
     /*----------Case Dim > 0----------*/
     //Generate random vertex coordinates in R^dim
-    else
-    {
-      double vertex_coords[numpoints][dim];
-      for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = 0; j < dim; j++)
-        {
-          vertex_coords[i][j] = random_num();
-          printf("%lf ", vertex_coords[i][j]);
-        }
-        printf("\n");
-      }
-      printf("\n");
 
-      for (int i = 0; i < numpoints; i++)
+        for (int i = 0; i < numpoints; i++)
+        {
+          for (int j = 0; j < dim; j++)
+          {
+            vertices[i].coord[j] = random_num();
+          }
+        }
+
+
+      /*for (int i = 0; i < numpoints; i++)
       {
         for (int j = i + 1; j < numpoints; j++)
         {
@@ -78,36 +77,46 @@ int main(int argc, char* argv[]) {
         }
       }
     }
+    printf("Matrix Filled \n"); */
 
-    printMatrix(numpoints);
-
-    /*----------Generate Heap!----------*/ 
+    /*----------Generate Heap!----------*/
     int size = 0;
     H = makeHeap(vertices, numpoints, &size);
 
-    double weight = prims(numpoints);
+    double weight = prims(numpoints, dim);
     printf("Weight: %lf\n", weight);
+    print_nodes(numpoints, dim);
 
     /*----------Free Data structures----------*/
     free(H.arr);
+    printf("Freed heap\n");
     free(vertices);
-    free_adj(numpoints); //free adjacency matrix
+    printf("Freed Vertices\n");
+
+    //free_adj(numpoints); //free adjacency matrix
 }
 
-double prims(int numpoints) {
+double prims(int numpoints, int dim) {
     Node v, w;
     double weight = 0;
+    double distance = 0;
     vertices[0].dist = 0; //set source distance to 0
     insert(H, &vertices[0]);
 
     while(Size(H) != 0) {
-        v = *(extractMin(H)); 
+        v = *(extractMin(H));
         weight += v.dist;
+        printf("Added edge of weight %lf\n", v.dist);
         v.inS = true;
-        for(int i = v.idx + 1; i < numpoints; i++) {
-            if(!vertices[i].inS && vertices[i].dist > adj_matrix[v.idx][i]) {
-                vertices[i].dist = adj_matrix[v.idx][i];
-                insert(H, &vertices[i]);
+        for(int i = 0; i < numpoints; i++) {
+            if (i != v.idx) {
+                distance = distance_finder(dim, v.idx, i, vertices);
+
+                if(!vertices[i].inS && vertices[i].dist > distance) {
+                    vertices[i].dist = distance;
+                    insert(H, &vertices[i]);
+                    isHeap(H);
+                }
             }
         }
     }
@@ -119,67 +128,27 @@ double random_num(void) {
     return (rand_number);
 }
 
-double distance_finder(int dim, int i, int j, double coords[][dim])
+double distance_finder(int dim, int i, int j, Node * vert)
 {
-    double output = 0;
+    double output;
     for (int k = 0; k < dim; k++)
     {
-        output = output + pow(coords[i][k]-coords[j][k],2);
+        output = output + pow(vert[i].coord[k]-vert[j].coord[k],2);
     }
     output = sqrt(output);
     return(output);
 }
 
-void printMatrix(int numpoints) {
-    for (int i = 0; i < numpoints; i++)
-    {
-      for (int j = 0; j < numpoints; j++)
-      {
-        printf("%lf ", (adj_matrix[i])[j]);
-      }
-      printf("\n");
-    }
-    printf("\n");
-}
 
-void fill_rand(int numpoints) {
+void print_nodes(int numpoints, int dim)
+{
     for (int i = 0; i < numpoints; i++)
     {
-        for (int j = i + 1; j < numpoints; j++)
+        for (int j = 0; j < dim; j++)
         {
-          adj_matrix[i][j] = random_num();
+          printf("%lf  ", vertices[i].coord[j]);
         }
+        printf("\n");
     }
+    printf("\n");
 }
-
-void free_adj(int numpoints) {
-    for(int i = 0; i < numpoints; i++) {
-        double* currentPtr = adj_matrix[i];
-        free(currentPtr);
-    }
-}
-/* Preliminary heap testing
-    int num[] = {51, 124, 109, 1, 61, 121, 50, 0, 0, 0, 0};
-    int* size = malloc(sizeof(int));
-    *size = 7;
-    struct Heap heap = makeHeap(num, size);
-    int curr = Size(heap);
-    for(int i = 0; i < curr; i++) {
-        printf("; %i", num[i]);
-    }
-    printf("\n");
-    
-    extractMin(heap);
-    for(int i = 0; i < Size(heap); i++) {
-        printf(", %i", num[i]);
-    }
-    printf("\n");
-
-    insert(heap, 5);
-    for(int i = 0; i < Size(heap); i++) {
-        printf(", %i", num[i]);
-    }
-    printf("\n");
-
-    free(size);
-    */
