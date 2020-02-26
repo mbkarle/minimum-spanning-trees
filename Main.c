@@ -1,7 +1,7 @@
 /*----------Import Libraries----------*/
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 #include <math.h>
 #include "Heap.h"
 #include <stdbool.h>
@@ -13,6 +13,7 @@ double distance_finder(int dim, int i, int j, Node * vert);
 double prims(int numpoints, int dim);
 void print_nodes(int numpoints, int dim);
 void nextCounter(int numpoints);
+struct timeval GetTimeStamp();
 
 Node* vertices;
 double** adj_matrix;
@@ -22,46 +23,25 @@ int counter;
 /*----------Main----------*/
 //command line input: - ./randmst 0 numpoints numtrials dimension
 int main(int argc, char* argv[]) {
-    double average = 0;
-    counter = 0;
-
-
-    srand(time(0) * 100000);
-    //seeds the random number generator with current time
-
-    //read inputs
+    int numtrials = atoi(argv[3]);
+    double total_weight_over_trials = 0;
     int numpoints = atoi(argv[2]);
-    printf("%i \n", numpoints);
     int dim = atoi(argv[4]);
+    srand(time(0));
+    for (int t = 0; t < numtrials; t++)
+    {
 
-    //instantiate n x n adjacency matrix
-    /*adj_matrix = malloc(numpoints * sizeof(double*));
-    for(int i = 0; i < numpoints; i++) {
-        adj_matrix[i] = malloc(numpoints * sizeof(double));
-    } */
+        double average = 0;
+        counter = 0;
 
-    //instantiate node array
-    vertices = malloc(sizeof(Node) * numpoints);
-    for(int i = 0; i < numpoints; i++) {
-        vertices[i].idx = i;
-        vertices[i].inS = false;
-        vertices[i].dist = INT_MAX;
-        vertices[i].inH = false;
-    }
-
-    printf("Vertices Malloced \n");
-
-
-
-    /*----------Case Dim = 0----------*/
-    //Fill with random weights in [0, 1]
-    //if (dim == 0)
-    //{
-    //  fill_rand(numpoints);
-    //}
-
-    /*----------Case Dim > 0----------*/
-    //Generate random vertex coordinates in R^dim
+        //instantiate node array
+        vertices = malloc(sizeof(Node) * numpoints);
+        for(int i = 0; i < numpoints; i++) {
+            vertices[i].idx = i;
+            vertices[i].inS = false;
+            vertices[i].dist = INT_MAX;
+            vertices[i].inH = false;
+        }
 
         for (int i = 0; i < numpoints; i++)
         {
@@ -71,32 +51,21 @@ int main(int argc, char* argv[]) {
           }
         }
 
+        /*----------Generate Heap!----------*/
+        int size = 0;
+        H = makeHeap(vertices, numpoints, &size);
 
-      /*for (int i = 0; i < numpoints; i++)
-      {
-        for (int j = i + 1; j < numpoints; j++)
-        {
-            adj_matrix[i][j] = distance_finder(dim, i, j, vertex_coords);
-        }
-      }
+        double weight = prims(numpoints, dim);
+        total_weight_over_trials += weight;
+        printf("\nWeight: %lf\n", weight);
+        //print_nodes(numpoints, dim);
+
+        /*----------Free Data structures----------*/
+        free(H.arr);
+        free(vertices);
     }
-    printf("Matrix Filled \n"); */
-
-    /*----------Generate Heap!----------*/
-    int size = 0;
-    H = makeHeap(vertices, numpoints, &size);
-
-    double weight = prims(numpoints, dim);
-    printf("Weight: %lf\n", weight);
-    //print_nodes(numpoints, dim);
-
-    /*----------Free Data structures----------*/
-    free(H.arr);
-    printf("Freed heap\n");
-    free(vertices);
-    printf("Freed Vertices\n");
-
-    //free_adj(numpoints); //free adjacency matrix
+    double average_weight = total_weight_over_trials / (double)numtrials;
+    printf("Average weight was %lf over %i trials with n = %i in dimenstion %i", average_weight, numtrials, numpoints, dim);
 }
 
 double prims(int numpoints, int dim) {
@@ -107,8 +76,6 @@ double prims(int numpoints, int dim) {
     insert(H, &vertices[0]);
 
     while(Size(H) != 0) {
-//        if(!isHeap(H))
- //           return 0;
         v = *(extractMin(H));
         weight += v.dist;
         nextCounter(numpoints);
@@ -116,7 +83,12 @@ double prims(int numpoints, int dim) {
         v.inS = true;
         for(int i = 0; i < numpoints; i++) {
             if (i != v.idx) {
-                distance = distance_finder(dim, v.idx, i, vertices);
+                if (dim != 0) {
+                    distance = distance_finder(dim, v.idx, i, vertices);
+                }
+                else {
+                    distance = random_num();
+                }
 
                 if(!vertices[i].inS && vertices[i].dist > distance) {
                     vertices[i].dist = distance;
@@ -165,4 +137,10 @@ void nextCounter(int numpoints) {
         printf("\rNodes in tree: %i / %i", counter, numpoints);
         fflush(stdout);
     }
+}
+
+struct timeval GetTimeStamp() {
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv;
 }
