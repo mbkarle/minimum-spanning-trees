@@ -77,7 +77,7 @@ double prims(int numpoints, int dim) {
 
     while(Size(H) != 0) {
         v = *(extractMin(H));
-        weight += v.dist;
+        weight += (dim != 0) ? sqrt(v.dist) : v.dist; //dist values are actually edge weights squared!
         nextCounter(numpoints);
         //printf("Added edge of weight %lf\n", v.dist);
         v.inS = true;
@@ -110,9 +110,9 @@ double distance_finder(int dim, int i, int j, Node * vert)
     double output = 0;
     for (int k = 0; k < dim; k++)
     {
-        output = output + pow(vert[i].coord[k]-vert[j].coord[k],2);
+        output = output + (vert[i].coord[k]-vert[j].coord[k])*(vert[i].coord[k]-vert[j].coord[k]);
     }
-    output = sqrt(output);
+    //output = sqrt(output); Don't in fact square root values until accurate value is truly needed
     //printf("edges %i to %i have weight: %lf\n", i, j, output);
     return(output);
 }
