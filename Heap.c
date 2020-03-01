@@ -81,8 +81,8 @@ Node* peek(struct Heap heap) {
     return heap.arr[0];
 }
 
+//remove minimum element and resort
 Node* extractMin(struct Heap heap) {
-//    isHeap(heap);
     Node* min = heap.arr[0];
     heap.arr[0] = heap.arr[Size(heap) - 1];
     (*(heap.arr[0])).heapIdx = 0;
@@ -91,6 +91,7 @@ Node* extractMin(struct Heap heap) {
     return min;
 }
 
+//insert new element in heap and resort as needed
 void insert(struct Heap heap, Node* value) { //insert new obj into heap
     Node** arr = heap.arr;
     int i = value -> heapIdx;
@@ -107,11 +108,13 @@ void insert(struct Heap heap, Node* value) { //insert new obj into heap
     }
 }
 
+//return the size of heap
 int Size(struct Heap heap) {
     int curr_size = *(heap.size);
     return curr_size;
 }
 
+//test function to print heap
 void printHeap(struct Heap heap) {
     for(int i = 0; i <= floor(log(Size(heap))/log(2)); i++) {
         for(int j = 0; j < pow(2, i); j++) {
@@ -122,6 +125,7 @@ void printHeap(struct Heap heap) {
     }
 }
 
+//test function to verify heap
 bool isHeap(struct Heap heap) {
     for(int i = 0; i < Size(heap); i++) {
         int l = left(i), r = right(i);
