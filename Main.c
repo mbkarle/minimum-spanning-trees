@@ -27,7 +27,9 @@ int main(int argc, char* argv[]) {
     double total_weight_over_trials = 0;
     int numpoints = atoi(argv[2]);
     int dim = atoi(argv[4]);
-    srand(time(0));
+    srand(time(0)); //seeding of RNG
+
+    /*----------Runs algoritym numtrials times----------*/
     for (int t = 0; t < numtrials; t++)
     {
 
@@ -42,7 +44,7 @@ int main(int argc, char* argv[]) {
             vertices[i].dist = INT_MAX;
             vertices[i].inH = false;
         }
-
+        //fills nodes array with random coords for each node struct
         for (int i = 0; i < numpoints; i++)
         {
           for (int j = 0; j < dim; j++)
@@ -54,18 +56,17 @@ int main(int argc, char* argv[]) {
         /*----------Generate Heap!----------*/
         int size = 0;
         H = makeHeap(vertices, numpoints, &size);
-
+        //runs prims
         double weight = prims(numpoints, dim);
         total_weight_over_trials += weight;
-        printf("\nWeight: %lf\n", weight);
-        //print_nodes(numpoints, dim);
+
 
         /*----------Free Data structures----------*/
         free(H.arr);
         free(vertices);
     }
     double average_weight = total_weight_over_trials / (double)numtrials;
-    printf("Average weight was %lf over %i trials with n = %i in dimenstion %i", average_weight, numtrials, numpoints, dim);
+    printf("%lf %i %i %i \n", average_weight, numpoints, numtrials, dim);
 }
 
 double prims(int numpoints, int dim) {
@@ -78,8 +79,6 @@ double prims(int numpoints, int dim) {
     while(Size(H) != 0) {
         v = *(extractMin(H));
         weight += (dim != 0) ? sqrt(v.dist) : v.dist; //dist values are actually edge weights squared!
-        nextCounter(numpoints);
-        //printf("Added edge of weight %lf\n", v.dist);
         v.inS = true;
         for(int i = 0; i < numpoints; i++) {
             if (i != v.idx) {
@@ -100,11 +99,13 @@ double prims(int numpoints, int dim) {
     return weight; //return mst weight
 }
 
+//helper function to return a random double between 1 and 0
 double random_num(void) {
     double rand_number = (double)rand() / (double)RAND_MAX;
     return (rand_number);
 }
 
+//helper function to find euclidean distance between two nodes
 double distance_finder(int dim, int i, int j, Node * vert)
 {
     double output = 0;
@@ -112,35 +113,14 @@ double distance_finder(int dim, int i, int j, Node * vert)
     {
         output = output + (vert[i].coord[k]-vert[j].coord[k])*(vert[i].coord[k]-vert[j].coord[k]);
     }
-    //output = sqrt(output); Don't in fact square root values until accurate value is truly needed
-    //printf("edges %i to %i have weight: %lf\n", i, j, output);
     return(output);
 }
 
-
-void print_nodes(int numpoints, int dim)
-{
-    for (int i = 0; i < numpoints; i++)
-    {
-        for (int j = 0; j < dim; j++)
-        {
-          printf("%lf  ", vertices[i].coord[j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
+//helper function used to track how far through running programm is
 void nextCounter(int numpoints) {
     counter++;
     if(counter % 1000 == 0) {
         printf("\rNodes in tree: %i / %i", counter, numpoints);
         fflush(stdout);
     }
-}
-
-struct timeval GetTimeStamp() {
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    return tv;
 }
