@@ -60,7 +60,6 @@ int main(int argc, char* argv[]) {
         double weight = prims(numpoints, dim);
         total_weight_over_trials += weight;
 
-
         /*----------Free Data structures----------*/
         free(H.arr);
         free(vertices);
